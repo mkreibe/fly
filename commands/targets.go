@@ -23,6 +23,7 @@ func (command *TargetsCommand) Execute([]string) error {
 	table := ui.Table{
 		Headers: ui.TableRow{
 			{Contents: "name", Color: color.New(color.Bold)},
+			{Contents: "team", Color: color.New(color.Bold)},
 			{Contents: "url", Color: color.New(color.Bold)},
 			{Contents: "expiry", Color: color.New(color.Bold)},
 		},
@@ -30,9 +31,11 @@ func (command *TargetsCommand) Execute([]string) error {
 
 	for targetName, targetValues := range flyYAML.Targets {
 		expirationTime := GetExpirationFromString(targetValues.Token)
+		teamName := GetTeamName(targetValues)
 
 		row := ui.TableRow{
 			{Contents: string(targetName)},
+			{Contents: teamName},
 			{Contents: targetValues.API},
 			{Contents: expirationTime},
 		}
@@ -43,6 +46,14 @@ func (command *TargetsCommand) Execute([]string) error {
 	sort.Sort(table.Data)
 
 	return table.Render(os.Stdout)
+}
+
+func GetTeamName(targetValues *targetDetailsYAML) string {
+	if targetValues == nill || len(targetValues.TeamName) == 0 {
+		return "n/a"
+	}
+
+	return targetValues.TeamName
 }
 
 func GetExpirationFromString(token *rc.TargetToken) string {
